@@ -157,7 +157,7 @@ class Persistente // esta clase va a abstraer toda la lógica de los eventos reg
     }    
 
   }
-void iniciar_eeprom()
+  void iniciar_eeprom()
   {
     uint16_t f;
     
@@ -167,7 +167,7 @@ void iniciar_eeprom()
     } 
   setEvent(0,0,true);    
   }     
- DateTime toDT(evento actual)                 // devuelve un DateTime a partir de una struct evento
+  DateTime toDT(evento actual)                 // devuelve un DateTime a partir de una struct evento
   {
   return DateTime(actual.ano, actual.mes, actual.dia, actual.hora, actual.minuto, actual.segundo);
   }  
@@ -207,11 +207,11 @@ void iniciar_eeprom()
   Serial.println((uint8_t)actual.minuto);
 #endif    
   }
-uint16_t getNextPointer()  // devuelve el siguiente puntero disponible
+  uint16_t getNextPointer()  // devuelve el siguiente puntero disponible
   {
   return  (ultimoEvento == tam ? 0 : ultimoEvento + 1);       //si hemos llegado al final de la memoria eeprom, el próximo puntero a usar es el principio de la memoria
   } 
-void chkLastEvent()
+  void chkLastEvent()
   {
    evento actual;
    if(primerEvento == 0 and ultimoEvento == 0)
