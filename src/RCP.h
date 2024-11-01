@@ -238,9 +238,9 @@ bool parada_flag = false, adrenalina_flag = false;     // flag para el status de
 Persistente Evento;                                    // instanciamos la clase Evento
 uint16_t idEventoRevisar;                               // identificador del evento en revisión. 
 int16_t adr_time = ADRTIME, adr_count = 0;             // segundos entre shots de adrenalina y contador de shots
-bool adr_refractario = false;
+bool adr_refractario = false;                           // Flag para ignorar la pulsacion repetida del boton adrenalina
 
-/********************************************** LISTA DE FUNCIIONES ***************************************/
+/********************************************** LISTA DE FUNCIONES ***************************************/
 void MatrizSetup();
 void RelojSetup();
 void OledSetup();
