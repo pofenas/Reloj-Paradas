@@ -43,6 +43,20 @@ if ( current.codigo == 0)
   Oled.display();
 }
 /********************************************
+ * 
+ * 
+ * 
+*********************************************/
+void msgBorradoEprom()
+{
+  Oled.setTextSize(1);   
+  Oled.clearDisplay();
+  Oled.setCursor(0, 0);
+  Oled.print("Borrando memoria.");
+  Oled.display();
+  delay(2000);
+}
+/********************************************
 *
 *     Impresión del tiempo de parada en la matriz de leds
 *
@@ -138,25 +152,22 @@ void ssDParada()
 void ssDNoParada()
 {
 
-  uint8_t temperatura, hora, minuto; 
+  uint8_t temperatura, hora, minuto,dospuntos; 
   uint8_t data[4];  // declaramos array para imprimir
 
   
   temperatura = reloj.getTemperature(); 
   hora = now.hour();
   minuto = now.minute();
+  dospuntos = (now.second()%2 ) * 64; // Tomará el valor 0 cuando sea un segundo par, 64 si impar. 
+                                      // Esto causará que los dos puntos del display se parpadeen con un ciclo de 1 Hz
   // Ponemos la hora en el primer display
-if(now.second()%2 == 0)
-  ssD1.showNumberDecEx(hora*100+minuto,64,true);  
-else
-  ssD1.showNumberDecEx(hora*100+minuto,0,true);  
-  
+  ssD1.showNumberDecEx(hora*100+minuto,dospuntos,true);  
+  // Componemos el contenido del segundo display  (temperatura)
   data[0] = ssD2.encodeDigit(temperatura/10);
   data[1] = ssD2.encodeDigit(temperatura%10);
   data[2] = GRADO;
   data[3] = CENTIGRADO;
-  
-  // y la temperatura en el segundo
   ssD2.setSegments(data); 
 }
 /*******************************************

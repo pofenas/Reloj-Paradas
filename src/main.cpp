@@ -1,6 +1,5 @@
 
 //#define __DEBUG__
-//#define BORRAR_EEPROM
 
 
 #include <RCP.h>
@@ -10,17 +9,12 @@
 
 void setup() 
 {
-
-
 #ifdef __DEBUG__
   Serial.begin(9600);
 #endif
-
-
 // OCULUS:   el orden de inicialización de los elementos resulta ser crítico. Si inicializamos la matriz de leds despues de los dispositivos I2C, deja de funcionar.
 // Inicializamos la matriz de leds
  MatrizSetup();
-  
   // Iniciamos el Reloj en tiempo real
   RelojSetup();
   // Oled setup
@@ -36,9 +30,12 @@ void setup()
   pinMode(INT_PARADA, INPUT_PULLUP);
   pinMode(INT_ADR, INPUT_PULLUP);
   now = reloj.now();   
-  #ifdef BORRAR_EEPROM
-   Evento.iniciar_eeprom();
-  #endif
+
+if(digitalRead(INT_PARADA)==HIGH and digitalRead(INT_ADR)==HIGH )
+  {
+    msgBorradoEprom();
+    Evento.iniciar_eeprom();
+  }
   Evento.setMaxMin();
   Evento.chkLastEvent();  
   idEventoRevisar = Evento.ultimoEvento;

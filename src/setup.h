@@ -25,19 +25,20 @@ void OledSetup()
   Serial.println("Iniciando pantalla OLED.");
 #endif
   // Iniciar pantalla OLED en la dirección 0x3C
-  if (!Oled.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+  if (!Oled.begin(SSD1306_SWITCHCAPVCC))
   {
 #ifdef __DEBUG__
     Serial.println("No se encuentra la pantalla OLED.");
 #endif
     while (true);
   }
+  
   Oled.clearDisplay();
   // Tamaño del texto
   Oled.setTextSize(2);
   // Color del texto
   Oled.setTextColor(SSD1306_WHITE);
-  Oled.display();  // pantalla borrada uy lista para trabajar
+  Oled.display();  // pantalla borrada y lista para trabajar
 }
 /***************************************************
 *
@@ -55,7 +56,7 @@ void RelojSetup()
     Serial.println("No se encuentra RTC.");
     Serial.flush();
 #endif
-    while (true);
+    //while (true);
   }
 }
 

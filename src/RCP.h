@@ -1,4 +1,5 @@
 
+#define timeThreshold  1        // delay para debounce
 #define ADRTIME 180               // tiempo entre inyecciones de adrenalina
 // ************************* Librerías para el RTC
 #include "RTClib.h"
@@ -67,6 +68,10 @@ MD_MAX72XX lDisplay = MD_MAX72XX(HARDWARE_TYPE, DIN_PIN, CLK_PIN, CS_PIN, MAT_CO
 
 TM1637Display ssD1(SSCLK1, SSDIO1);
 TM1637Display ssD2(SSCLK2, SSDIO2);
+
+
+int counter = 0;
+long startTime = 0;
 
 /*********************************************************
 * Definir constantes para el funcionamiento del programa *
@@ -250,6 +255,6 @@ void displayRevisar();
 void ssDParada();
 void ssDNoParada();
 void xdisplaySetupTime(const String& ,uint16_t);
-void menuSelect();
-void setupTimeSelect();
-void revisar();
+void menuSelect(bool);
+void setupTimeSelect(bool);
+void revisar(bool);

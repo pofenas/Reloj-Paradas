@@ -7,20 +7,82 @@
 **************************************************************/
 void doEncode()
 {
-  long ms;
-  ms = micros();
-while(micros()-ms < 1000);
-  if(accion == IDLE)
-    return;    
-    
-if (accion == MENU)
-  menuSelect();
-if (accion == SETUP_TIME)
-  setupTimeSelect();
+  static int8_t anterior;
+  int8_t a,b, estado;
+  bool direccion, aceptar;
+  noInterrupts(); // inhibimos interrupciones
+
+  a = digitalRead(ENC_UP);  // leemos el estado de los pines del encoder
+  b = digitalRead(ENC_DOWN);
+
+  if (a == LOW and b== LOW )
+   estado = 1;
+  if (a == HIGH and b== LOW )
+   estado = 2;
+  if (a == HIGH and b== HIGH )
+   estado = 3;
+  if (a == LOW and b== HIGH )
+   estado = 4;
+                          // solo hay cuatro estados posibles, y las transiciones son de un estado al siguiente o anterior en orden numerico.
+  if (anterior == 0)      // esto solo es para la primera vez que entra.
+    {
+    anterior = estado;
+    interrupts();
+    return;
+    }
   
-if (accion == REVISAR)
-  revisar();
-}  
+  switch (anterior)
+   {
+   case 1:
+    if (estado == 4)
+      {direccion = false;aceptar = true;}
+    if (estado == 3)
+      {direccion = true;aceptar = true;}
+    if (estado == 2)
+      {aceptar = false;}
+    break;
+   case 2:
+    if (estado == 4)
+      {direccion = false;aceptar = true;}
+    if (estado == 3)
+      {direccion = true;aceptar = true;}
+    if (estado == 1)
+      {aceptar = false;}
+    break;
+   case 3:
+    if (estado == 1)
+      {direccion = true;aceptar = true;}
+    if (estado == 2)
+      {direccion = false;aceptar = true;}
+    if (estado == 4)
+      {aceptar = false;}
+    break;
+   case 4: 
+    if (estado == 2)
+      {direccion = false;aceptar = true;}
+    if (estado == 1)
+      {direccion = true;aceptar = true;}
+    if (estado == 3)
+      {aceptar = false;}
+    break;;
+   default:
+    break;
+   }
+  if(aceptar == false)
+    {interrupts();return;}
+   anterior = estado;                               // guardamos el estado actual como anterior para la próxima
+   if(accion == IDLE)
+      return;    
+   if (accion == MENU)
+    menuSelect(direccion);
+   if (accion == SETUP_TIME)
+    setupTimeSelect(direccion);
+   if (accion == REVISAR)
+    revisar(direccion);
+   
+  startTime = millis();
+  interrupts();
+}
 /*************************************************************
 *
 * Rutina de servicio de la interrupción del pulsador del encoder
@@ -28,35 +90,38 @@ if (accion == REVISAR)
 **************************************************************/  
 void doSwitch()
 {
-  long ms;
-  ms = micros();
-while(micros()-ms < 1000);  
+
 if (parada_flag)              // si hay una parada en curso, se ignora la pulsación del encoder
   return;  
-  
-switch (accion)
- {
-  case IDLE:
-    accion = MENU;
-    break;
-  case MENU:
-    accion = opc_actual;
-    break;
-  case SETUP_TIME:
-    setup_time_opcion++;
-    if (setup_time_opcion > ANNO )
-      {
-      time_adjust = true;
+  noInterrupts();
+ if (millis() - startTime > timeThreshold)
+  {
+  switch (accion)
+    {
+    case IDLE:
+      accion = MENU;
+      break;
+    case MENU:
+      accion = opc_actual;
+      break;
+    case SETUP_TIME:
+      setup_time_opcion++;
+      if (setup_time_opcion > ANNO )
+        {
+        time_adjust = true;
+        accion = IDLE;
+        setup_time_opcion = HORA;
+        }      
+      break;
+    case REVISAR:
       accion = IDLE;
-      setup_time_opcion = HORA;
-      }      
-    break;
-  case REVISAR:
-    accion = IDLE;
+    }
+  startTime = millis();
   }
+  interrupts();
 }
 // se ejecuta dentro de la interrupcion del encoder, sólo cuando está seleccionada la opción del menu 'ajuste de hora'
-void setupTimeSelect()
+void setupTimeSelect( bool direccion)
 {
 switch (setup_time_opcion)  
   {
@@ -64,7 +129,7 @@ int8_t current;
 int16_t yr;
   case  HORA:  
     current = now.hour();
-    if  (digitalRead(ENC_UP) == digitalRead(ENC_DOWN))  // subiendo
+    if  (direccion)  // subiendo
     {    
     current ++;                    // incrementamos una hora
     if(current== 24)               // si hemos llegado al final
@@ -80,7 +145,7 @@ int16_t yr;
     break;
   case  MINUTOS:  
     current = now.minute();
-    if  (digitalRead(ENC_UP) == digitalRead(ENC_DOWN))  // subiendo
+    if  (direccion)  // subiendo
     {    
     current ++;                    // incrementamos un minuto
     if(current== 60)               // si hemos llegado al final
@@ -96,7 +161,7 @@ int16_t yr;
     break;    
   case  DIA:  
     current = now.day();
-    if  (digitalRead(ENC_UP) == digitalRead(ENC_DOWN))  // subiendo
+    if  (direccion)  // subiendo
     {    
     current ++;                    // incrementamos un dia
     if(current > 31)               // si hemos llegado al final
@@ -112,7 +177,7 @@ int16_t yr;
     break;    
   case  MES:  
     current = now.month();
-    if  (digitalRead(ENC_UP) == digitalRead(ENC_DOWN))  // subiendo
+    if  (direccion)  // subiendo
     {    
     current ++;                    // incrementamos un mes
     if(current > 12)               // si hemos llegado al final
@@ -129,11 +194,11 @@ int16_t yr;
   case  ANNO: 
     yr = now.year();
 #ifdef __DEBUG__
- Serial.print ("leidoaño: ");
+ Serial.print ("leido año: ");
  Serial.println((uint16_t) yr);
 #endif
     
-    if  (digitalRead(ENC_UP) == digitalRead(ENC_DOWN))  // subiendo
+    if  (direccion)  // subiendo
       yr ++;                    // incrementamos un año
     else                             // bajando
       yr --;                    // decrementamos un año      
@@ -149,9 +214,9 @@ int16_t yr;
   }
 }
 // Se ejecuta dentro de la interrupción asociada al encoder cuando está activado el menu
-void menuSelect()
+void menuSelect( bool direccion)
 {
-  if  (digitalRead(ENC_UP) == digitalRead(ENC_DOWN))
+  if  (direccion)
     {    
     opc_actual++;
     if(opc_actual >IDLE )
@@ -165,9 +230,9 @@ void menuSelect()
     }    
 }
 // se ejecuta dentro de la interrupcion del encoder, sólo cuando está seleccionada la opción del menu 'revisar'
-void revisar()
+void revisar(bool direccion)
 {
-  if  (digitalRead(ENC_UP) == digitalRead(ENC_DOWN))
+  if  (direccion)
     {    
     idEventoRevisar++;
     if(idEventoRevisar > Evento.tam )
