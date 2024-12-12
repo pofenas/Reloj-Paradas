@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../Documentos/PlatformIO/Projects/Prueba ESP-32"
+		},
+		{
+			"name": "Reloj Paradas",
+			"path": "../Documentos/PlatformIO/Projects/Reloj Paradas"
+		},
+		{
+			"name": "Temporizador",
+			"path": "../Documentos/PlatformIO/Projects/Temporizador"
+		}
+	],
+	"settings": {}
+}

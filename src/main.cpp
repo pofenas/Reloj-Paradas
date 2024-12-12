@@ -1,5 +1,5 @@
 
-//#define __DEBUG__
+#define __DEBUG__
 
 
 #include <RCP.h>
